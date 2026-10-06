@@ -1,0 +1,221 @@
+---
+import Base from '../layouts/Base.astro';
+import { SERVICES, SITE } from '../lib/site';
+
+const useEndpoint = Boolean(SITE.formEndpoint);
+const budgets = ['Under $10k', '$10k–$25k', '$25k–$50k', '$50k+', 'Not sure yet'];
+---
+
+<Base title="Start a project" description="Tell twoseedev about your project.">
+  <div class="wrap layout">
+    <header class="page-head">
+      <span class="mono eyebrow">contact</span>
+      <h1>Start a project</h1>
+      <p>
+        Tell us about the space, the audience, and what you'd like people to notice. We'll get
+        back to you within a few days.
+      </p>
+      <div class="direct">
+        <span class="mono muted">or email</span>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </div>
+    </header>
+
+    <form
+      id="inquiry"
+      action={useEndpoint ? SITE.formEndpoint : `mailto:${SITE.email}`}
+      method="post"
+      enctype={useEndpoint ? undefined : 'text/plain'}
+      data-mailto={useEndpoint ? undefined : SITE.email}
+    >
+      <div class="row">
+        <label>
+          <span class="mono">name</span>
+          <input name="name" autocomplete="name" required />
+        </label>
+        <label>
+          <span class="mono">email</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+      </div>
+
+      <label>
+        <span class="mono">organization</span>
+        <input name="organization" autocomplete="organization" />
+      </label>
+
+      <fieldset>
+        <legend class="mono">what do you need?</legend>
+        <div class="options">
+          {
+            SERVICES.map((s) => (
+              <label class="option">
+                <input type="checkbox" name="services" value={s.title} />
+                <span>{s.title}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <label>
+          <span class="mono">budget</span>
+          <select name="budget">
+            <option value="">Select…</option>
+            {budgets.map((b) => <option>{b}</option>)}
+          </select>
+        </label>
+        <label>
+          <span class="mono">timeline</span>
+          <input name="timeline" placeholder="e.g. opening in March" />
+        </label>
+      </div>
+
+      <label>
+        <span class="mono">tell us about it</span>
+        <textarea name="message" rows="6" required></textarea>
+      </label>
+
+      <button type="submit" class="button primary">Send inquiry</button>
+    </form>
+  </div>
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 0 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .direct {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 2rem;
+    font-size: 1.15rem;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: clamp(0rem, 12vw, 9rem);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: 1.5rem;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  label > .mono,
+  legend {
+    color: var(--muted);
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .option {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.92rem;
+    cursor: pointer;
+  }
+
+  .option:has(input:checked) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .option input {
+    accent-color: var(--accent);
+    margin: 0;
+  }
+
+  button {
+    align-self: flex-start;
+    cursor: pointer;
+    font: inherit;
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#inquiry')!;
+  const to = form.dataset.mailto;
+
+  if (to) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const get = (k: string) => String(data.get(k) ?? '').trim();
+      const body = [
+        `Name: ${get('name')}`,
+        `Email: ${get('email')}`,
+        `Organization: ${get('organization')}`,
+        `Services: ${data.getAll('services').join(', ')}`,
+        `Budget: ${get('budget')}`,
+        `Timeline: ${get('timeline')}`,
+        '',
+        get('message'),
+      ].join('\n');
+      const subject = `Project inquiry — ${get('organization') || get('name')}`;
+      location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+  }
+</script>

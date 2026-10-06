@@ -1,0 +1,166 @@
+---
+import Base from '../layouts/Base.astro';
+import { AUDIENCES, SITE, url } from '../lib/site';
+
+const principles = [
+  {
+    title: 'Start with the signal',
+    body: 'Every piece begins with something real — a sound, a dataset, a movement, a quality of light — not a visual effect looking for a reason.',
+  },
+  {
+    title: 'Prototype early, in the studio',
+    body: 'We test ideas with working builds as soon as possible, so decisions are made with something you can actually see and feel.',
+  },
+  {
+    title: 'Built to run',
+    body: "Installations live in the real world. We design for reliability, easy operation, and the people who'll look after it once we leave.",
+  },
+];
+
+const tools = ['TouchDesigner', 'Unreal Engine', 'GLSL', 'Projection mapping', 'LED', 'Sensors & cameras', 'Audio analysis', 'Data feeds & APIs'];
+---
+
+<Base title="Studio" description={SITE.description}>
+  <div class="wrap">
+    <header class="page-head">
+      <span class="mono eyebrow">studio</span>
+      <h1>{SITE.statement}</h1>
+      <p>{SITE.description}</p>
+    </header>
+
+    <div class="prose intro">
+      <p>
+        Most of what shapes a space goes unnoticed — the hum of a building, the signals passing
+        through a room, the way people move through it, the forces we can measure but never see.
+        twoseedev turns those overlooked signals into real-time experiences people can stand
+        inside.
+      </p>
+      <p>
+        We split our time between client work and studio research. The research lives in the{' '}
+        <a href={url('lab/')}>Lab</a>: small, fast experiments that keep our tools sharp and often
+        become the starting point for a project.
+      </p>
+    </div>
+
+    <section class="section">
+      <h2>How we think</h2>
+      <ul class="principles">
+        {
+          principles.map(({ title, body }, i) => (
+            <li>
+              <span class="mono eyebrow">0{i + 1}</span>
+              <h3>{title}</h3>
+              <p class="muted">{body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="section two-col">
+      <div>
+        <h2>Tools</h2>
+        <ul class="chips mono">
+          {tools.map((t) => <li>{t}</li>)}
+        </ul>
+      </div>
+      <div>
+        <h2>Built for</h2>
+        <ul class="list">
+          {AUDIENCES.map((a) => <li>{a}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section cta">
+      <p>Let's make something visible.</p>
+      <a href={url('contact/')} class="button primary">Start a project</a>
+    </section>
+  </div>
+</Base>
+
+<style>
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: 2rem;
+  }
+
+  .intro {
+    font-size: 1.15rem;
+    padding-bottom: 2rem;
+  }
+
+  .principles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  .principles li {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .principles .eyebrow {
+    margin-bottom: 0.6rem;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .principles p {
+    margin: 0;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 3rem;
+  }
+
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .chips li {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    color: var(--muted);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 1.15rem;
+  }
+
+  .list li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .cta p {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+</style>

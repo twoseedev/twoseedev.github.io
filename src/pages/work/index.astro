@@ -1,0 +1,53 @@
+---
+import Base from '../../layouts/Base.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import { getWork, url } from '../../lib/site';
+
+const work = await getWork();
+---
+
+<Base title="Work" description="Selected projects by twoseedev.">
+  <div class="wrap">
+    <header class="page-head">
+      <span class="mono eyebrow">work</span>
+      <h1>Selected work</h1>
+      <p>
+        Projects for clients and partners. Our ongoing research lives in the{' '}
+        <a href={url('lab/')}>Lab</a>.
+      </p>
+    </header>
+
+    {
+      work.length > 0 ? (
+        <div class="grid">
+          {work.map((entry) => <WorkCard entry={entry} />)}
+        </div>
+      ) : (
+        <div class="empty">
+          <p>
+            New case studies are on the way. In the meantime, see what we're exploring in the{' '}
+            <a href={url('lab/')}>Lab</a>.
+          </p>
+          <a href={url('contact/')} class="button primary">Start a project</a>
+        </div>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 5rem;
+  }
+
+  .empty {
+    max-width: 32rem;
+  }
+
+  .empty p {
+    color: var(--muted);
+    font-size: 1.2rem;
+    margin: 0 0 1.5rem;
+  }
+</style>

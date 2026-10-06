@@ -1,0 +1,258 @@
+---
+import { SITE, url } from '../lib/site';
+---
+
+<section class="hero">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="wrap content">
+    <span class="mono eyebrow">{SITE.name} — {SITE.tagline.toLowerCase()}</span>
+    <h1>{SITE.statement}</h1>
+    <p>
+      We build real-time installations, visuals, and interactive experiences that reveal the
+      signals around us — in TouchDesigner and Unreal Engine.
+    </p>
+    <div class="actions">
+      <a href={url('contact/')} class="button primary">Start a project</a>
+      <a href={url('services/')} class="button">What we do</a>
+    </div>
+  </div>
+  <div class="wrap readout mono" aria-live="off">
+    <span>your cursor has traveled <b id="hero-distance">0.00 m</b></span>
+    <span>you have been here <b id="hero-time">00:00</b></span>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: calc(100svh - 3.5rem);
+    min-height: 32rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .content {
+    position: relative;
+    pointer-events: none;
+    padding-bottom: 2.5rem;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 10vw, 8.5rem);
+    max-width: 11ch;
+    letter-spacing: -0.04em;
+  }
+
+  p {
+    max-width: 32rem;
+    margin: 1.5rem 0 0;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    pointer-events: auto;
+  }
+
+  .readout {
+    position: relative;
+    pointer-events: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+  }
+
+  .readout b {
+    font-weight: 400;
+    color: var(--accent);
+  }
+</style>
+
+<script>
+  import * as THREE from 'three';
+
+  const TRAIL = 48;
+  const SPACING = 22;
+  const PX_PER_METER = 96 / 0.0254;
+
+  const canvas = document.querySelector<HTMLCanvasElement>('#hero-canvas')!;
+  const distanceEl = document.querySelector('#hero-distance')!;
+  const timeEl = document.querySelector('#hero-time')!;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const vertexShader = /* glsl */ `
+    uniform vec3 uTrail[${TRAIL}];
+    uniform float uTime;
+    uniform float uRadius;
+    uniform float uPixelRatio;
+    varying float vEnergy;
+
+    void main() {
+      vec3 p = position;
+      float energy = 0.0;
+      vec2 push = vec2(0.0);
+
+      for (int i = 0; i < ${TRAIL}; i++) {
+        vec2 d = p.xy - uTrail[i].xy;
+        float f = uTrail[i].z * exp(-dot(d, d) / (uRadius * uRadius));
+        energy += f;
+        push += normalize(d + 0.0001) * f;
+      }
+
+      p.xy += push * 14.0;
+      p.xy += vec2(sin(uTime * 0.5 + p.y * 0.015), cos(uTime * 0.4 + p.x * 0.015)) * 1.5;
+
+      vEnergy = clamp(energy, 0.0, 1.0);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      gl_PointSize = (2.0 + vEnergy * 3.5) * uPixelRatio;
+    }
+  `;
+
+  const fragmentShader = /* glsl */ `
+    uniform vec3 uBase;
+    uniform vec3 uAccent;
+    varying float vEnergy;
+
+    void main() {
+      vec2 c = gl_PointCoord - 0.5;
+      if (dot(c, c) > 0.25) discard;
+      gl_FragColor = vec4(mix(uBase, uAccent, vEnergy), 0.5 + vEnergy * 0.5);
+      #include <colorspace_fragment>
+    }
+  `;
+
+  function start() {
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
+
+    const trail = Array.from({ length: TRAIL }, () => new THREE.Vector3(-9999, -9999, 0));
+    const uniforms = {
+      uTrail: { value: trail },
+      uTime: { value: 0 },
+      uRadius: { value: 90 },
+      uPixelRatio: { value: 1 },
+      uBase: { value: new THREE.Color('#4a4946') },
+      uAccent: { value: new THREE.Color('#9ef0d2') },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      depthWrite: false,
+    });
+    const points = new THREE.Points(new THREE.BufferGeometry(), material);
+    scene.add(points);
+
+    let width = 0;
+    let height = 0;
+
+    function resize() {
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      const ratio = Math.min(devicePixelRatio, 2);
+      renderer.setPixelRatio(ratio);
+      renderer.setSize(width, height, false);
+      uniforms.uPixelRatio.value = ratio;
+      camera.right = width;
+      camera.top = height;
+      camera.updateProjectionMatrix();
+
+      const cols = Math.ceil(width / SPACING) + 1;
+      const rows = Math.ceil(height / SPACING) + 1;
+      const positions = new Float32Array(cols * rows * 3);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = (y * cols + x) * 3;
+          positions[i] = x * SPACING;
+          positions[i + 1] = y * SPACING;
+        }
+      }
+      points.geometry.dispose();
+      points.geometry = new THREE.BufferGeometry();
+      points.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    }
+
+    let head = 0;
+    let last: { x: number; y: number } | null = null;
+    let traveled = 0;
+
+    canvas.parentElement!.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = height - (e.clientY - rect.top);
+      if (last) {
+        const d = Math.hypot(x - last.x, y - last.y);
+        if (d < 6) return;
+        traveled += d;
+      }
+      last = { x, y };
+      trail[head].set(x, y, 1);
+      head = (head + 1) % TRAIL;
+    });
+
+    canvas.parentElement!.addEventListener('pointerleave', () => {
+      last = null;
+    });
+
+    let visible = true;
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+    }).observe(canvas);
+
+    const startedAt = performance.now();
+    let lastFrame = startedAt;
+    let lastReadout = 0;
+
+    function frame(now: number) {
+      requestAnimationFrame(frame);
+      const dt = Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+
+      if (now - lastReadout > 250) {
+        lastReadout = now;
+        const seconds = Math.floor((now - startedAt) / 1000);
+        const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const ss = String(seconds % 60).padStart(2, '0');
+        timeEl.textContent = `${mm}:${ss}`;
+        distanceEl.textContent = `${(traveled / PX_PER_METER).toFixed(2)} m`;
+      }
+
+      if (!visible) return;
+      const decay = Math.pow(0.35, dt);
+      for (const t of trail) t.z *= decay;
+      if (!reducedMotion) uniforms.uTime.value += dt;
+      renderer.render(scene, camera);
+    }
+
+    resize();
+    addEventListener('resize', resize);
+    requestAnimationFrame(frame);
+  }
+
+  try {
+    start();
+  } catch {
+    canvas.remove();
+  }
+</script>

@@ -1,0 +1,90 @@
+---
+import { SITE, url } from '../lib/site';
+
+const links = [
+  { label: 'Work', href: url('work/') },
+  { label: 'Services', href: url('services/') },
+  { label: 'Lab', href: url('lab/') },
+  { label: 'Studio', href: url('studio/') },
+];
+
+const current = Astro.url.pathname.replace(/\/?$/, '/');
+---
+
+<header class="header">
+  <div class="wrap inner">
+    <a href={url()} class="logo">{SITE.name}</a>
+    <nav>
+      {
+        links.map(({ label, href }) => (
+          <a href={href} aria-current={current.startsWith(href) ? 'page' : undefined}>
+            {label}
+          </a>
+        ))
+      }
+      <a href={url('contact/')} class="cta" aria-current={current.startsWith(url('contact/')) ? 'page' : undefined}>
+        Start a project
+      </a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3.5rem;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.9rem, 2.5vw, 2rem);
+  }
+
+  nav a {
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--fg);
+  }
+
+  nav .cta {
+    color: var(--bg);
+    background: var(--fg);
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+  }
+
+  nav .cta:hover,
+  nav .cta[aria-current='page'] {
+    color: var(--bg);
+    background: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    nav a:not(.cta) {
+      display: none;
+    }
+  }
+</style>

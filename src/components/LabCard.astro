@@ -1,0 +1,64 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Media from './Media.astro';
+import Tags from './Tags.astro';
+import { formatDate, url } from '../lib/site';
+
+interface Props {
+  entry: CollectionEntry<'lab'>;
+}
+
+const { entry } = Astro.props;
+const { title, date, signal, tools, inputs, video, poster } = entry.data;
+---
+
+<article class="card" data-tools={tools.join(' ')} data-inputs={inputs.join(' ')}>
+  <a href={url(`lab/${entry.id}/`)}>
+    <Media title={title} video={video} poster={poster} mode="thumb" />
+    <div class="meta">
+      <span class="mono muted">{formatDate(date)}</span>
+      <h3>{title}</h3>
+      <p class="muted">{signal}</p>
+    </div>
+  </a>
+  <Tags tools={tools} inputs={inputs} />
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .card[hidden] {
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  a:hover h3 {
+    color: var(--accent);
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    transition: color 0.15s;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.92rem;
+  }
+</style>

@@ -1,0 +1,177 @@
+---
+import Base from '../layouts/Base.astro';
+import { PROCESS, SERVICES, url } from '../lib/site';
+---
+
+<Base title="Services" description="Interactive installations, real-time visuals, Unreal Engine, and prototyping by twoseedev.">
+  <div class="wrap">
+    <header class="page-head">
+      <span class="mono eyebrow">services</span>
+      <h1>What we do</h1>
+      <p>
+        We work with teams who want people to notice something they'd normally miss — and we
+        handle it end to end, from first idea to install.
+      </p>
+    </header>
+
+    <div class="services">
+      {
+        SERVICES.map((s, i) => (
+          <section id={s.id} class="service">
+            <div class="label">
+              <span class="mono muted">0{i + 1}</span>
+              <h2>{s.title}</h2>
+            </div>
+            <div class="body">
+              <p class="lead">{s.summary}</p>
+              <p class="muted">{s.detail}</p>
+              <ul class="mono">
+                {s.deliverables.map((d) => <li>{d}</li>)}
+              </ul>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+
+    <section class="section">
+      <h2 class="sub">Process</h2>
+      <ol class="process">
+        {
+          PROCESS.map((step, i) => (
+            <li>
+              <span class="mono eyebrow">0{i + 1}</span>
+              <h3>{step.title}</h3>
+              <p class="muted">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="section engage">
+      <h2 class="sub">Ways to work together</h2>
+      <div class="cards">
+        <div>
+          <h3>Project</h3>
+          <p class="muted">A defined build with a clear scope, timeline, and launch — an installation, a show, an experience.</p>
+        </div>
+        <div>
+          <h3>Sprint</h3>
+          <p class="muted">One to three weeks of focused prototyping to test an idea or a technical approach.</p>
+        </div>
+        <div>
+          <h3>Partner</h3>
+          <p class="muted">Ongoing creative technology support for agencies, studios, and venues.</p>
+        </div>
+      </div>
+      <a href={url('contact/')} class="button primary">Start a project</a>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .services {
+    border-top: 1px solid var(--line);
+  }
+
+  .service {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 1.5rem 3rem;
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 4rem;
+  }
+
+  @media (max-width: 760px) {
+    .service {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .label h2 {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+  }
+
+  .body p {
+    margin: 0 0 1rem;
+  }
+
+  .lead {
+    font-size: 1.2rem;
+  }
+
+  .body ul {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    gap: 0.5rem 1.5rem;
+  }
+
+  .body li::before {
+    content: '+ ';
+    color: var(--accent);
+  }
+
+  .sub {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: 2rem;
+  }
+
+  .process {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  .process li {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .process .eyebrow {
+    margin-bottom: 0.6rem;
+  }
+
+  .process h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .process p,
+  .cards p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .cards div {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1.5rem;
+  }
+
+  .cards h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+</style>

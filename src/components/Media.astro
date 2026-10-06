@@ -1,0 +1,75 @@
+---
+import { asset } from '../lib/site';
+
+interface Props {
+  title: string;
+  video?: string;
+  poster?: string;
+  // "thumb" never embeds an iframe, so grids stay light.
+  mode?: 'full' | 'thumb';
+}
+
+const { title, video, poster, mode = 'full' } = Astro.props;
+
+const vimeoId = video?.match(/^(\d+)$/)?.[1] ?? video?.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1];
+const directVideo = video && !vimeoId ? asset(video) : undefined;
+const posterSrc = asset(poster);
+---
+
+<div class="media">
+  {
+    vimeoId && mode === 'full' ? (
+      <iframe
+        src={`https://player.vimeo.com/video/${vimeoId}?background=1`}
+        title={title}
+        allow="autoplay; fullscreen; picture-in-picture"
+        loading="lazy"
+      />
+    ) : directVideo ? (
+      <video
+        src={directVideo}
+        poster={posterSrc}
+        autoplay
+        muted
+        loop
+        playsinline
+        preload={mode === 'thumb' ? 'none' : 'metadata'}
+      />
+    ) : posterSrc ? (
+      <img src={posterSrc} alt={title} loading="lazy" />
+    ) : (
+      <div class="placeholder" aria-hidden="true">
+        <span class="mono">{title}</span>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--bg-raised);
+    border-radius: 4px;
+  }
+
+  .media > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 0;
+  }
+
+  .placeholder {
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    background:
+      radial-gradient(circle at 30% 40%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%),
+      repeating-linear-gradient(0deg, transparent 0 11px, var(--line) 11px 12px),
+      var(--bg-raised);
+  }
+</style>

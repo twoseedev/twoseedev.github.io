@@ -1,0 +1,73 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Media from './Media.astro';
+import Tags from './Tags.astro';
+import { url } from '../lib/site';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+const { title, summary, year, client, tools, inputs, video, poster, draft } = entry.data;
+---
+
+<article class="card">
+  <a href={url(`work/${entry.id}/`)}>
+    <Media title={title} video={video} poster={poster} mode="thumb" />
+    <div class="meta">
+      <div class="row mono muted">
+        {client && <span>{client}</span>}
+        <span>{year}</span>
+        {draft && <span class="draft">draft — hidden on live site</span>}
+      </div>
+      <h3>{title}</h3>
+      <p class="muted">{summary}</p>
+    </div>
+  </a>
+  <Tags tools={tools} inputs={inputs} />
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  a {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  a:hover h3 {
+    color: var(--accent);
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .draft {
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    transition: color 0.15s;
+  }
+
+  p {
+    margin: 0;
+    max-width: 36rem;
+  }
+</style>

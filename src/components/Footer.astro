@@ -1,0 +1,122 @@
+---
+import { SERVICES, SITE, url } from '../lib/site';
+---
+
+<footer class="footer">
+  <div class="wrap grid">
+    <div class="brand">
+      <a href={url()} class="logo">{SITE.name}</a>
+      <p class="muted">{SITE.tagline}. {SITE.statement}</p>
+      <a href={`mailto:${SITE.email}`} class="email">{SITE.email}</a>
+    </div>
+
+    <div>
+      <h2 class="mono muted">studio</h2>
+      <ul>
+        <li><a href={url('work/')}>Work</a></li>
+        <li><a href={url('lab/')}>Lab</a></li>
+        <li><a href={url('studio/')}>Studio</a></li>
+        <li><a href={url('contact/')}>Contact</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="mono muted">services</h2>
+      <ul>
+        {SERVICES.map((s) => <li><a href={url(`services/#${s.id}`)}>{s.title}</a></li>)}
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="mono muted">follow</h2>
+      <ul>
+        {
+          SITE.socials.map(({ label, href }) => (
+            <li>
+              <a href={href} target="_blank" rel="noopener">
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="wrap legal mono muted">
+    <span>© {new Date().getFullYear()} {SITE.name}</span>
+    <span>{SITE.location}</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: 4rem 0 2rem;
+    margin-top: 4rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    text-decoration: none;
+  }
+
+  .brand p {
+    margin: 0.75rem 0 1rem;
+    max-width: 22rem;
+    font-size: 0.92rem;
+  }
+
+  .email {
+    font-size: 0.95rem;
+  }
+
+  h2 {
+    font-weight: 400;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  ul a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  ul a:hover {
+    color: var(--fg);
+  }
+
+  .legal {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+</style>

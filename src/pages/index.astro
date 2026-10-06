@@ -1,0 +1,243 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import WorkCard from '../components/WorkCard.astro';
+import LabCard from '../components/LabCard.astro';
+import { AUDIENCES, PROCESS, SERVICES, SITE, getLab, getWork, url } from '../lib/site';
+
+const work = (await getWork()).slice(0, 3);
+const lab = (await getLab()).slice(0, 3);
+---
+
+<Base>
+  <Hero />
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What we do</h2>
+        <a href={url('services/')} class="mono">all services →</a>
+      </div>
+      <ul class="services">
+        {
+          SERVICES.map((s, i) => (
+            <li>
+              <a href={url(`services/#${s.id}`)}>
+                <span class="mono muted">0{i + 1}</span>
+                <h3>{s.title}</h3>
+                <p class="muted">{s.summary}</p>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    work.length > 0 && (
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Selected work</h2>
+            <a href={url('work/')} class="mono">all work →</a>
+          </div>
+          <div class="work-grid">
+            {work.map((entry) => <WorkCard entry={entry} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How we work</h2>
+      </div>
+      <ol class="process">
+        {
+          PROCESS.map((step, i) => (
+            <li>
+              <span class="mono accent">0{i + 1}</span>
+              <h3>{step.title}</h3>
+              <p class="muted">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {
+    lab.length > 0 && (
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2>From the lab</h2>
+              <p class="muted lede">Studio R&amp;D — small experiments that feed into client work.</p>
+            </div>
+            <a href={url('lab/')} class="mono">all studies →</a>
+          </div>
+          <div class="lab-grid">
+            {lab.map((entry) => <LabCard entry={entry} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="wrap audiences">
+      <h2 class="mono muted">built for</h2>
+      <ul>
+        {AUDIENCES.map((a) => <li>{a}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap cta">
+      <p>Have a space, an audience, or a signal worth revealing?</p>
+      <div class="actions">
+        <a href={url('contact/')} class="button primary">Start a project</a>
+        <a href={`mailto:${SITE.email}`} class="button">{SITE.email}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .lede {
+    margin: 0.5rem 0 0;
+  }
+
+  .services {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+
+  .services li {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .services a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 1.75rem 1.5rem 2rem;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .services a:hover {
+    background: var(--bg-raised);
+    color: inherit;
+  }
+
+  .services a:hover h3 {
+    color: var(--accent);
+  }
+
+  .services h3 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    transition: color 0.15s;
+  }
+
+  .services p,
+  .process p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .work-grid {
+    display: grid;
+    gap: 4rem;
+  }
+
+  .process {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  .process li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .process h3 {
+    font-size: 1.15rem;
+  }
+
+  .accent {
+    color: var(--accent);
+  }
+
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 3rem 2rem;
+  }
+
+  .audiences {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 1rem 3rem;
+  }
+
+  .audiences h2 {
+    font-size: 0.78rem;
+    font-weight: 400;
+  }
+
+  .audiences ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+  }
+
+  .cta {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .cta p {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    max-width: 20ch;
+    margin: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

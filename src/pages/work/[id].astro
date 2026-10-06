@@ -1,0 +1,86 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Media from '../../components/Media.astro';
+import Tags from '../../components/Tags.astro';
+import { getWork, url } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const work = await getWork();
+  return work.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { title, summary, year, client, scope, tools, inputs, video, poster } = entry.data;
+const { Content } = await render(entry);
+---
+
+<Base title={title} description={summary}>
+  <article class="wrap">
+    <header class="page-head">
+      <a href={url('work/')} class="mono muted back">← work</a>
+      <h1>{title}</h1>
+      <p>{summary}</p>
+      <dl class="mono">
+        {client && <div><dt>client</dt><dd>{client}</dd></div>}
+        <div><dt>year</dt><dd>{year}</dd></div>
+        {scope.length > 0 && <div><dt>scope</dt><dd>{scope.join(', ')}</dd></div>}
+      </dl>
+      <Tags tools={tools} inputs={inputs} />
+    </header>
+
+    <Media title={title} video={video} poster={poster} />
+
+    <div class="prose body">
+      <Content />
+    </div>
+
+    <section class="section next">
+      <p>Have a project like this in mind?</p>
+      <a href={url('contact/')} class="button primary">Start a project</a>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+  }
+
+  dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin: 2rem 0 1rem;
+  }
+
+  dt {
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .body {
+    margin-top: 3rem;
+  }
+
+  .next {
+    margin-top: 4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .next p {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    letter-spacing: -0.02em;
+  }
+</style>

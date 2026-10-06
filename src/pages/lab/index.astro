@@ -1,0 +1,119 @@
+---
+import Base from '../../layouts/Base.astro';
+import LabCard from '../../components/LabCard.astro';
+import { INPUTS, TOOLS } from '../../lib/taxonomy';
+import { TOOL_LABELS, getLab } from '../../lib/site';
+
+const lab = await getLab();
+const tools = TOOLS.filter((t) => lab.some((e) => e.data.tools.includes(t)));
+const inputs = INPUTS.filter((i) => lab.some((e) => e.data.inputs.includes(i)));
+---
+
+<Base title="Lab" description="Studio R&D from twoseedev — small studies in making the invisible visible.">
+  <div class="wrap">
+    <header class="page-head">
+      <span class="mono eyebrow">studio r&amp;d</span>
+      <h1>Lab</h1>
+      <p>
+        Small, fast studies — each one picks a mundane or invisible signal and tries to make it
+        visible. This is where we test tools and ideas before they show up in client work.
+      </p>
+    </header>
+
+    {
+      lab.length > 0 && (
+        <div class="filters mono">
+          <div class="group" data-group="tools">
+            <button aria-pressed="true" data-value="">all tools</button>
+            {tools.map((t) => (
+              <button aria-pressed="false" data-value={t}>
+                {TOOL_LABELS[t]}
+              </button>
+            ))}
+          </div>
+          <div class="group" data-group="inputs">
+            <button aria-pressed="true" data-value="">all signals</button>
+            {inputs.map((i) => (
+              <button aria-pressed="false" data-value={i}>
+                {i}
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <div class="grid">
+      {lab.map((entry) => <LabCard entry={entry} />)}
+    </div>
+    <p class="empty muted" hidden>Nothing matches those filters yet.</p>
+  </div>
+</Base>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  button {
+    font: inherit;
+    text-transform: inherit;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    color: var(--fg);
+  }
+
+  button[aria-pressed='true'] {
+    color: var(--bg);
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 3rem 2rem;
+  }
+</style>
+
+<script>
+  const active: Record<string, string> = { tools: '', inputs: '' };
+  const cards = document.querySelectorAll<HTMLElement>('.grid > .card');
+  const empty = document.querySelector<HTMLElement>('.empty')!;
+
+  document.querySelectorAll<HTMLElement>('.filters .group').forEach((group) => {
+    const key = group.dataset.group!;
+    group.addEventListener('click', (e) => {
+      const button = (e.target as HTMLElement).closest('button');
+      if (!button) return;
+      active[key] = button.dataset.value!;
+      group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = Object.entries(active).every(
+          ([k, v]) => !v || card.dataset[k]!.split(' ').includes(v),
+        );
+        card.hidden = !match;
+        if (match) shown++;
+      });
+      empty.hidden = shown > 0;
+    });
+  });
+</script>

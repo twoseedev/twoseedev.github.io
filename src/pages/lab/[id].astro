@@ -1,0 +1,77 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Media from '../../components/Media.astro';
+import Tags from '../../components/Tags.astro';
+import { formatDate, getLab, url } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const lab = await getLab();
+  return lab.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, newer: lab[i - 1], older: lab[i + 1] },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry, newer, older } = Astro.props;
+const { title, date, signal, tools, inputs, video, poster } = entry.data;
+const { Content } = await render(entry);
+---
+
+<Base title={title} description={signal}>
+  <article class="wrap">
+    <header class="page-head">
+      <a href={url('lab/')} class="mono muted back">← lab</a>
+      <span class="mono muted date">{formatDate(date)}</span>
+      <h1>{title}</h1>
+      <p>{signal}</p>
+      <Tags tools={tools} inputs={inputs} />
+    </header>
+
+    <Media title={title} video={video} poster={poster} />
+
+    <div class="prose body">
+      <Content />
+    </div>
+
+    <nav class="pager mono">
+      {newer ? <a href={url(`lab/${newer.id}/`)}>← {newer.data.title}</a> : <span />}
+      {older && <a href={url(`lab/${older.id}/`)}>{older.data.title} →</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+  }
+
+  .date {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .page-head p {
+    margin-bottom: 1.5rem;
+  }
+
+  .body {
+    margin-top: 3rem;
+  }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .pager a {
+    text-decoration: none;
+  }
+</style>
